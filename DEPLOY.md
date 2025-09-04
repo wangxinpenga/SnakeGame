@@ -13,10 +13,16 @@
 
 ### 1. 启用 GitHub Pages
 
-1. 进入你的 GitHub 仓库页面
-2. 点击 **Settings** 选项卡
-3. 在左侧菜单中找到 **Pages**
-4. 在 **Source** 部分选择 **GitHub Actions**
+**重要：必须正确配置 GitHub Pages 才能访问项目**
+
+1. 进入你的 GitHub 仓库页面：`https://github.com/你的用户名/SnakeGame`
+2. 点击 "Settings" 选项卡（在仓库顶部导航栏）
+3. 在左侧菜单中向下滚动找到 "Pages" 选项
+4. 在 "Source" 部分：
+   - 选择 "Deploy from a branch" 或 "GitHub Actions"
+   - **推荐选择 "GitHub Actions"**（这样会使用我们的自动部署工作流）
+5. 点击 "Save" 保存设置
+6. 等待几分钟，页面会显示你的网站地址：`https://你的用户名.github.io/SnakeGame/`
 
 ### 2. 推送代码触发部署
 
@@ -66,36 +72,82 @@ git push origin main
 
 ## 故障排除
 
-### 部署失败
+### 1. 白屏或 404 错误
+
+**症状：** 访问 GitHub Pages 地址时出现白屏或看到 404 错误
+
+**原因：** `vite.config.ts` 中的 `base` 路径配置不正确
+
+**解决方案：**
+
+1. **检查你的仓库名称**：
+   - 如果仓库名是 `SnakeGame`，`base` 应该设置为 `/SnakeGame/`
+   - 如果仓库名是 `你的用户名.github.io`，`base` 应该设置为 `/`
+
+2. **修改 `vite.config.ts`**：
+   ```typescript
+   export default defineConfig({
+     base: process.env.NODE_ENV === 'production' ? '/你的仓库名/' : '/',
+     // ... 其他配置
+   })
+   ```
+
+3. **重新构建和推送**：
+   ```bash
+   pnpm build
+   git add .
+   git commit -m "fix: update base path for GitHub Pages"
+   git push
+   ```
+
+### 2. GitHub Pages 未启用或部署失败
+
+**症状：** 浏览器请求错误路径如 `https://用户名.github.io/src/main.tsx`
+
+**原因：** GitHub Pages 没有正确启用或部署没有成功
+
+**诊断步骤：**
+
+1. **检查 GitHub Pages 设置**：
+   - 访问 `https://github.com/你的用户名/SnakeGame/settings/pages`
+   - 确认 "Source" 设置为 "GitHub Actions"
+   - 查看是否显示网站地址
+
+2. **检查 GitHub Actions 部署状态**：
+   - 访问 `https://github.com/你的用户名/SnakeGame/actions`
+   - 查看最新的工作流运行状态
+   - 如果显示红色 ❌，点击查看错误详情
+   - 如果显示绿色 ✅，说明部署成功
+
+3. **检查部署权限**：
+   - 在仓库 Settings → Actions → General
+   - 确认 "Workflow permissions" 设置为 "Read and write permissions"
+   - 勾选 "Allow GitHub Actions to create and approve pull requests"
+
+4. **手动触发部署**：
+   ```bash
+   # 推送一个空提交来触发部署
+   git commit --allow-empty -m "trigger deployment"
+   git push
+   ```
+
+**解决方案：**
+- 如果 GitHub Pages 未启用，按照上面的步骤 1 启用
+- 如果权限不足，按照步骤 3 调整权限设置
+- 等待 5-10 分钟让部署完成
+- 访问正确的地址：`https://你的用户名.github.io/SnakeGame/`
+
+### 3. 部署失败
 
 1. 检查 Actions 页面的错误日志
 2. 确保所有依赖都在 `package.json` 中正确声明
 3. 检查构建命令是否能在本地正常运行
 
-### 页面无法访问
+### 4. 页面无法访问
 
 1. 确认 GitHub Pages 已启用
 2. 检查仓库是否为公开仓库（私有仓库需要 GitHub Pro）
 3. 等待几分钟，DNS 传播需要时间
-
-### 白屏或404错误（资源加载失败）
-
-**症状**：页面显示白屏，控制台出现类似 `GET https://用户名.github.io/src/main.tsx net::ERR_ABORTED 404` 的错误
-
-**原因**：`vite.config.ts` 中的 base 路径配置与实际仓库名称不匹配
-
-**解决方案**：
-1. 检查你的 GitHub 仓库名称
-2. 修改 `vite.config.ts` 中的 base 配置：
-   ```typescript
-   // 如果仓库名为 username.github.io（用户主页）
-   base: process.env.NODE_ENV === 'production' ? '/' : '/'
-   
-   // 如果仓库名为其他名称（如 my-game）
-   base: process.env.NODE_ENV === 'production' ? '/my-game/' : '/'
-   ```
-3. 重新构建：`pnpm build`
-4. 提交并推送更改
 
 ## 项目特性
 
