@@ -56,3 +56,6 @@ export default tseslint.config({
 })
 ```
 "# SnakeGame" 
+
+
+贪吃蛇
