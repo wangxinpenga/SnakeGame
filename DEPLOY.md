@@ -5,7 +5,9 @@
 ## 前置条件
 
 1. 确保你的项目已经推送到 GitHub 仓库
-2. 仓库名称应为 `snakegame`（如果不是，请修改 `vite.config.ts` 中的 base 路径）
+2. **重要**：根据你的仓库名称配置正确的 base 路径：
+   - 如果仓库名为 `[用户名].github.io`（用户主页仓库），使用 `base: '/'`
+   - 如果仓库名为其他名称（如 `my-snake-game`），使用 `base: '/my-snake-game/'`
 
 ## 部署步骤
 
@@ -76,10 +78,24 @@ git push origin main
 2. 检查仓库是否为公开仓库（私有仓库需要 GitHub Pro）
 3. 等待几分钟，DNS 传播需要时间
 
-### 资源加载失败
+### 白屏或404错误（资源加载失败）
 
-1. 检查 `vite.config.ts` 中的 base 路径是否正确
-2. 确保仓库名称与 base 路径匹配
+**症状**：页面显示白屏，控制台出现类似 `GET https://用户名.github.io/src/main.tsx net::ERR_ABORTED 404` 的错误
+
+**原因**：`vite.config.ts` 中的 base 路径配置与实际仓库名称不匹配
+
+**解决方案**：
+1. 检查你的 GitHub 仓库名称
+2. 修改 `vite.config.ts` 中的 base 配置：
+   ```typescript
+   // 如果仓库名为 username.github.io（用户主页）
+   base: process.env.NODE_ENV === 'production' ? '/' : '/'
+   
+   // 如果仓库名为其他名称（如 my-game）
+   base: process.env.NODE_ENV === 'production' ? '/my-game/' : '/'
+   ```
+3. 重新构建：`pnpm build`
+4. 提交并推送更改
 
 ## 项目特性
 
